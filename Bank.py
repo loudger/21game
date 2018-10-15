@@ -6,21 +6,27 @@ class Bank():
 
     # Конструктор
     def __init__(self):
-        self.bank = {}
+        self.bank = {{}}
+        self.split_bank = {}   #Необходим для реализации сплита
 
     # Назначает диллера
     def indicate_diller(self, diller):
         self.diller = diller
 
     # Ставка сделана и сохранена в словаре
-    def bet_in_bank(self, human):
-        self.bank[human] = human.betting()
+    def bet_in_bank(self, player):
+        self.bank[player][0] = player.betting()
+
+    # Ставка сделана в словарь№2
+    # Используется для сплита
+    def bet_in_split_bank(self, player):
+        self.split_bank[player] = self.bank[player]
 
     # Удваивает ставку
-    def double_bet(self,human):
+    def double_bet(self, player, split = False):
         for key in self.bank:
-            if key == human:
-                human.money-= self.bank[key]
+            if key == player:
+                player.money-= self.bank[key]
                 self.bank[key] *= 2
 
     # Возвращает деньги при выигрыше

@@ -23,18 +23,17 @@ class Person():
         self.name = name
 
     # Удаляет все карты из руки
-    def refresh(self):
+    def refresh(self):          #Переписывать из-за сплита
         self.hand.clear()
         self.to_much = False
 
-    # Возвращает все карты из руки
-    def give_all_cards(self):
-        return self.hand
-
     # Берёт одну или больше карт из колоды
-    def get_card(self, deck, count = 1):
+    def get_card(self, deck, count = 1, split = False):
         for i in range(count):
-            self.hand.append(deck.get_one_card())
+            # if split:
+            #     self.split_hand.append(deck.get_one_card())
+            # else:
+                self.hand.append(deck.get_one_card())
 
         # Делает ставку
     def betting(self):
@@ -64,37 +63,54 @@ class Person():
         return False
 
     # Проверка на удвоение
-    def checkup_dubl(self, limit_money):
+    def checkup_dubl(self, limit_money):    #Пересиписывать из-за сплита
         if len(self.hand) == 2 and self.money > limit_money:
             return True
         return False
 
     # Раздвоить карты (сплит)
     def split_cards(self):
-        pass #Потом реализую
+        self.split_hand = []
+        self.split_to_much = False
+        self.split_hand.append(self.hand[1])
+        self.hand.pop(1)
+        self.get_card(split = False)
+        self.get_card(split = True)
 
-    # Считает количетсво очков
-    def points_in_hand(self):
+    # Выводит количество очков в руке
+    def points_in_hand(self, split_hand = False):   #Пересиписывать из-за сплита
         points = 0
         count_ace = 0
-        for item in self.hand:
-            if isinstance(item, str):
-                if item == 'T':
-                    points += 11
-                    count_ace += 1
-                else:
-                    points += 10
-            else:
-                points += item
-            while points > 21:
-                if count_ace > 0:
-                    points -= 10
-                    count_ace -= 1
-                else:
-                    break
-        if points > 21:
-            self.to_much = 1
+        if split_hand:
+            for item in self.split_hand:
+                points = self.count_points(item)
+                if points > 21:
+                    self.split_to_much = 1
+        else:
+            for item in self.hand:
+                self.count_points(item)
+                if points > 21:
+                    self.to_much = 1
         return points
+
+    #Считает количесво очков в руке
+    def count_points(self, item):
+        if isinstance(item, str):
+            if item == 'T':
+                points += 11
+                count_ace += 1
+            else:
+                points += 10
+        else:
+            points += item
+        while points > 21:
+            if count_ace > 0:
+                points -= 10
+                count_ace -= 1
+            else:
+                break
+        return points
+
 
     # Выбор действия (хватит, ещё, удвоить, сплит)
     def move(self, limit_money):

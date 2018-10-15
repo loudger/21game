@@ -47,7 +47,63 @@ class Round():
                         self.player_lose(player)
                     break
                 else:
-                    pass
+                    player.split_cards()
+                    self.bank.bet_in_split_bank(player)
+                    self.start_split_move(player)
+
+    # Реализация сплита
+    def start_split_move(self, player):
+        print ('Первая рука {} - {}\nВторая рука {} - {}'.format(player.hand, player.points_in_hand(),player.split_hand, player.points_in_hand(split = True)))
+        while True:
+            print('\n', player.name)
+            print(player.hand, '-', player.points_in_hand())
+            move_code = player.move(self.bank.return_value(player))
+            if move_code == 1:
+                break
+            elif move_code == 2:
+                player.get_card(self.deck)
+                player.points_in_hand()
+                if player.to_much == True:
+                    print('\n', player.name)
+                    print(player.hand, '-', player.points_in_hand())
+                    self.player_lose(player)
+                    break
+            elif move_code == 3:
+                player.get_card(self.deck)
+                self.bank.double_bet(player)
+                print('\n', player.name)
+                print(player.hand, '-', player.points_in_hand())
+                player.points_in_hand()
+                if player.to_much == True:
+                    print('\n', player.name)
+                    print(player.hand, '-', player.points_in_hand())
+                    self.player_lose(player)
+                break
+        while True:
+            print('\n', player.name)
+            print(player.split_hand, '-', player.points_in_hand(split = True))
+            move_code = player.move(self.bank.return_value(player))
+            if move_code == 1:
+                break
+            elif move_code == 2:
+                player.get_card(self.deck, split = True)
+                player.points_in_hand(split = True)
+                if player.split_to_much == True:
+                    print('\n', player.name)
+                    print(player.split_hand, '-', player.points_in_hand(split = True))
+                    # self.player_lose(player) переделать
+                    break
+            elif move_code == 3:
+                player.get_card(self.deck, split = True)
+                # self.bank.double_bet(player) Переделать
+                print('\n', player.name)
+                print(player.split_hand, '-', player.points_in_hand(split = True))
+                player.points_in_hand(split = True)
+                if player.split_to_much == True:
+                    print('\n', player.name)
+                    print(player.split_hand, '-', player.points_in_hand(split = True))
+                    # self.player_lose(player) Переделать
+                break
 
     # Показать карты диллера
     def show_diller_cards(self, hide = True):
