@@ -17,7 +17,7 @@ class Round():
         self.deck = deck
 
     # Ход игрока
-    def players_move(self, set_players = None):
+    def players_move(self, set_players = None, split = False):
         if set_players is None:
             players = self.players
         else:
@@ -28,15 +28,15 @@ class Round():
                 while True:
                     print('\n', player.name)
                     print(player.hand[num_hand]['hand_cards'], '-', player.points_in_hand(num_hand))
-                    move_code = player.move(self.bank.return_value(player, num_hand))
+                    if player.points_in_hand(num_hand) == 21:
+                        break
+                    move_code = player.move(self.bank.return_value(player, num_hand), num_hand = num_hand)
                     if move_code == 1:
                         break
                     elif move_code == 2:
                         player.get_card(self.deck, num_hand = num_hand)
                         player.points_in_hand(num_hand)
                         if player.hand[num_hand]['hand_to_much'] == True:
-                            print('\n', player.name)
-                            print(player.hand[num_hand]['hand_cards'], '-', player.points_in_hand(num_hand))
                             self.player_lose(player, num_hand)
                             break
                     elif move_code == 3:
@@ -54,7 +54,7 @@ class Round():
                         pass
                         player.split_cards(self.deck)
                         self.bank.bet_in_split_bank(player)
-                        self.players_move(player)
+                        self.players_move(player, split = True)
                         break
 
     # Показать карты диллера

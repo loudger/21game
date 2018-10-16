@@ -120,14 +120,14 @@ class Person():
 
 
     # Выбор действия (хватит, ещё, удвоить, сплит)
-    def move(self, limit_money):
+    def move(self, limit_money, num_hand = 0):
         possibility = 2
         print ('1. Хватит')
         print ('2. Ещё')
-        if self.checkup_dubl(limit_money):
+        if self.checkup_dubl(limit_money, num_hand):
             possibility = 3
             print ('3. Удвоить')
-            if self.checkup_split(limit_money):
+            if self.checkup_split(limit_money, num_hand) and len(self.hand) == 1 :
                 possibility = 4
                 print ('4. Сплит')
         while True:

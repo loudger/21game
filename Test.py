@@ -11,18 +11,19 @@ deck = Deck()
 bank = Bank()
 
 
-game = Game()
-game.create_players()
+game = Game(bank)
+# game.create_players()
 
-round = Round(game.players_list, game.random_diller(), bank, deck)
+# round = Round(game.players_list, game.random_diller(), bank, deck)
 
+game.cycle_rounds()
 
-while True:
-	round.indicate_diller_for_bank()
-	round.push_bets()
-	round.give_cards_to_players()
-	round.players_move()
-	round.diller_turn()
-	round.comprasion_points()
-	round.refresh_round()
+# while True:
+# 	round.indicate_diller_for_bank()
+# 	round.push_bets()
+# 	round.give_cards_to_players()
+# 	round.players_move()
+# 	round.diller_turn()
+# 	round.comprasion_points()
+# 	round.refresh_round()
 
