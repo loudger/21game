@@ -9,7 +9,6 @@ class Round():
     # Конструктор класса раунд
     def __init__(self, all_players, diller, bank, deck):
         self.bank = bank
-        # self.bank.refresh_bank()
         self.count_player = len(all_players)
         self.all_players = copy.copy(all_players)
         self.players = copy.copy(all_players)
@@ -18,100 +17,53 @@ class Round():
         self.deck = deck
 
     # Ход игрока
-    def players_move(self):
-        for player in self.players:
-            self.show_diller_cards()
-            while True:
-                print('\n', player.name)
-                print(player.hand, '-', player.points_in_hand())
-                move_code = player.move(self.bank.return_value(player))
-                if move_code == 1:
-                    break
-                elif move_code == 2:
-                    player.get_card(self.deck)
-                    player.points_in_hand()
-                    if player.to_much == True:
-                        print('\n', player.name)
-                        print(player.hand, '-', player.points_in_hand())
-                        self.player_lose(player)
+    def players_move(self, set_players = None):
+        if set_players is None:
+            players = self.players
+        else:
+            players = [set_players]
+        for player in players:
+            for num_hand in range(len(player.hand)):
+                self.show_diller_cards()
+                while True:
+                    print('\n', player.name)
+                    print(player.hand[num_hand]['hand_cards'], '-', player.points_in_hand(num_hand))
+                    move_code = player.move(self.bank.return_value(player, num_hand))
+                    if move_code == 1:
                         break
-                elif move_code == 3:
-                    player.get_card(self.deck)
-                    self.bank.double_bet(player)
-                    print('\n', player.name)
-                    print(player.hand, '-', player.points_in_hand())
-                    player.points_in_hand()
-                    if player.to_much == True:
+                    elif move_code == 2:
+                        player.get_card(self.deck, num_hand = num_hand)
+                        player.points_in_hand(num_hand)
+                        if player.hand[num_hand]['hand_to_much'] == True:
+                            print('\n', player.name)
+                            print(player.hand[num_hand]['hand_cards'], '-', player.points_in_hand(num_hand))
+                            self.player_lose(player, num_hand)
+                            break
+                    elif move_code == 3:
+                        player.get_card(self.deck, num_hand = num_hand)
+                        self.bank.double_bet(player, num_hand)
                         print('\n', player.name)
-                        print(player.hand, '-', player.points_in_hand())
-                        self.player_lose(player)
-                    break
-                else:
-                    player.split_cards()
-                    self.bank.bet_in_split_bank(player)
-                    self.start_split_move(player)
-
-    # Реализация сплита
-    def start_split_move(self, player):
-        print ('Первая рука {} - {}\nВторая рука {} - {}'.format(player.hand, player.points_in_hand(),player.split_hand, player.points_in_hand(split = True)))
-        while True:
-            print('\n', player.name)
-            print(player.hand, '-', player.points_in_hand())
-            move_code = player.move(self.bank.return_value(player))
-            if move_code == 1:
-                break
-            elif move_code == 2:
-                player.get_card(self.deck)
-                player.points_in_hand()
-                if player.to_much == True:
-                    print('\n', player.name)
-                    print(player.hand, '-', player.points_in_hand())
-                    self.player_lose(player)
-                    break
-            elif move_code == 3:
-                player.get_card(self.deck)
-                self.bank.double_bet(player)
-                print('\n', player.name)
-                print(player.hand, '-', player.points_in_hand())
-                player.points_in_hand()
-                if player.to_much == True:
-                    print('\n', player.name)
-                    print(player.hand, '-', player.points_in_hand())
-                    self.player_lose(player)
-                break
-        while True:
-            print('\n', player.name)
-            print(player.split_hand, '-', player.points_in_hand(split = True))
-            move_code = player.move(self.bank.return_value(player))
-            if move_code == 1:
-                break
-            elif move_code == 2:
-                player.get_card(self.deck, split = True)
-                player.points_in_hand(split = True)
-                if player.split_to_much == True:
-                    print('\n', player.name)
-                    print(player.split_hand, '-', player.points_in_hand(split = True))
-                    # self.player_lose(player) переделать
-                    break
-            elif move_code == 3:
-                player.get_card(self.deck, split = True)
-                # self.bank.double_bet(player) Переделать
-                print('\n', player.name)
-                print(player.split_hand, '-', player.points_in_hand(split = True))
-                player.points_in_hand(split = True)
-                if player.split_to_much == True:
-                    print('\n', player.name)
-                    print(player.split_hand, '-', player.points_in_hand(split = True))
-                    # self.player_lose(player) Переделать
-                break
+                        print(player.hand[num_hand]['hand_cards'], '-', player.points_in_hand(num_hand))
+                        player.points_in_hand(num_hand)
+                        if player.hand[num_hand]['hand_to_much'] == True:
+                            print('\n', player.name)
+                            print(player.hand[num_hand]['hand_cards'], '-', player.points_in_hand(num_hand))
+                            self.player_lose(player, num_hand)
+                        break
+                    else:
+                        pass
+                        player.split_cards(self.deck)
+                        self.bank.bet_in_split_bank(player)
+                        self.players_move(player)
+                        break
 
     # Показать карты диллера
     def show_diller_cards(self, hide = True):
         print('\nКарты диллера')
         if hide == True:
-            print ([self.diller.hand[0], '?'])
+            print ([self.diller.hand[0]['hand_cards'][0], '?'])
         else:
-            print (self.diller.hand,'-',self.diller.points_in_hand())
+            print (self.diller.hand[0]['hand_cards'],'-',self.diller.points_in_hand())
 
     # Игроки делают ставки
     def push_bets(self):
@@ -123,47 +75,49 @@ class Round():
     # Раздать карты игрокам
     def give_cards_to_players(self):
         for player in self.all_players:
-            player.get_card(self.deck, 2)
+            player.get_card(self.deck, count = 2)
 
 
     # Сравнивает очки
     def comprasion_points(self):
-        if self.diller.to_much:
+        if self.diller.hand[0]['hand_to_much']:
             for player in self.players:
-                if player.to_much == False:
-                    self.result_win(player)
+                for num_hand in range(len(player.hand)):
+                    if player.hand[num_hand]['hand_to_much'] == False:
+                        self.result_win(player, num_hand)
         else:
             for player in self.players:
-                if player.to_much == False:
-                    if player.points_in_hand() > self.diller.points_in_hand():
-                        self.result_win(player)
-                    elif player.points_in_hand() < self.diller.points_in_hand():
-                        self.player_lose(player)
-                    else:
-                        self.result_draw(player)
+                for num_hand in range(len(player.hand)):
+                    if player.hand[num_hand]['hand_to_much'] == False:
+                        if player.points_in_hand(num_hand) > self.diller.points_in_hand():
+                            self.result_win(player, num_hand)
+                        elif player.points_in_hand(num_hand) < self.diller.points_in_hand():
+                            self.player_lose(player, num_hand)
+                        else:
+                            self.result_draw(player, num_hand)
 
     # Указать диллера для банка
     def indicate_diller_for_bank(self):
         self.bank.indicate_diller(self.diller)
 
     # Реализация выигрыша
-    def result_win(self, player):
+    def result_win(self, player, num_hand):
         print()
-        print('{},{}={} > Вы выиграли!'.format(player.name, player.hand, player.points_in_hand()))
-        self.bank.rewarding(player)
+        print('{},{}={} > Вы выиграли!'.format(player.name, player.hand[num_hand]['hand_cards'], player.points_in_hand(num_hand)))
+        self.bank.rewarding(player, num_hand)
 
     # Если игрок проиграл
-    def player_lose(self, player):
+    def player_lose(self, player, num_hand):
         print()
-        print('{},{}={} > Вы проиграли!'.format(player.name, player.hand, player.points_in_hand()))
+        print('{},{}={} > Вы проиграли!'.format(player.name, player.hand[num_hand]['hand_cards'], player.points_in_hand(num_hand)))
         # self.players.remove(player)
-        self.bank.diller_is_winer(player)
+        self.bank.diller_is_winer(player, num_hand)
 
     # Реализация ничьи
-    def result_draw(self,player):
+    def result_draw(self,player, num_hand):
         print()
-        print('{},{}={} > Ничья!'.format(player.name, player.hand, player.points_in_hand()))
-        self.bank.return_money(player)
+        print('{},{}={} > Ничья!'.format(player.name, player.hand[num_hand]['hand_cards'], player.points_in_hand(num_hand)))
+        self.bank.return_money(player, num_hand)
 
     # Ход диллера
     def diller_turn(self):
@@ -176,6 +130,7 @@ class Round():
         self.players = copy.copy(self.all_players)
         for player in self.all_players:
             player.refresh()
+            player.add_hand_element()
         self.players.remove(self.diller)
         self.deck.refresh_cards()
         self.bank.refresh_bank()
@@ -191,8 +146,9 @@ class Round():
     def count_to_much(self):
         count = 0
         for player in self.players:
-            if player.to_much == False:
-                count += 1
+            for num_hand in range(len(player.hand)):
+                if player.hand[num_hand]['hand_to_much'] == False:
+                    count += 1
         return count
 
 

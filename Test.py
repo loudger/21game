@@ -11,8 +11,6 @@ deck = Deck()
 bank = Bank()
 
 
-
-
 game = Game()
 game.create_players()
 

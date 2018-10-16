@@ -18,24 +18,25 @@ class Person():
     # Конструктор игрока
     def __init__(self, name = 'noname', money = 1000):
         self.hand = []
+        self.add_hand_element()
+        # hand = [{ 'hand_cards':[] , 'hand_to_much':False } , ... }
         self.money = money
-        self.to_much = False
         self.name = name
 
+    # Добавить руку в случае сплита.
+    def add_hand_element(self):
+        self.hand.append({'hand_cards':[], 'hand_to_much':False})
+
     # Удаляет все карты из руки
-    def refresh(self):          #Переписывать из-за сплита
+    def refresh(self):
         self.hand.clear()
-        self.to_much = False
 
     # Берёт одну или больше карт из колоды
-    def get_card(self, deck, count = 1, split = False):
+    def get_card(self, deck, num_hand = 0, count = 1):
         for i in range(count):
-            # if split:
-            #     self.split_hand.append(deck.get_one_card())
-            # else:
-                self.hand.append(deck.get_one_card())
+                self.hand[num_hand]['hand_cards'].append(deck.get_one_card())
 
-        # Делает ставку
+    # Делает ставку
     def betting(self):
         while True:
             try:
@@ -51,65 +52,71 @@ class Person():
     def diller_logic(self, deck):
         while self.points_in_hand() <= 16:
             self.get_card(deck)
-            print (self.hand,'-', self.points_in_hand())
+            print (self.hand[0]['hand_cards'],'-', self.points_in_hand())
         if self.points_in_hand() > 21:
-            self.to_much = True
+            self.hand[0]['hand_to_much'] = True
 
     # Проверка на сплит
-    def checkup_split(self, limit_money):
-        if len(self.hand) == 2 and self.money > limit_money:
-            if cost_card(self.hand[0]) == cost_card(self.hand[1]):
+    def checkup_split(self, limit_money, num_hand = 0):
+        if len(self.hand[num_hand]['hand_cards']) == 2 and self.money > limit_money:
+            if cost_card(self.hand[num_hand]['hand_cards'][0]) == cost_card(self.hand[num_hand]['hand_cards'][1]):
                 return True
         return False
 
     # Проверка на удвоение
-    def checkup_dubl(self, limit_money):    #Пересиписывать из-за сплита
-        if len(self.hand) == 2 and self.money > limit_money:
+    def checkup_dubl(self, limit_money, num_hand = 0):    #Пересиписывать из-за сплита
+        if len(self.hand[num_hand]['hand_cards']) == 2 and self.money > limit_money:
             return True
         return False
 
     # Раздвоить карты (сплит)
-    def split_cards(self):
-        self.split_hand = []
-        self.split_to_much = False
-        self.split_hand.append(self.hand[1])
-        self.hand.pop(1)
-        self.get_card(split = False)
-        self.get_card(split = True)
+    def split_cards(self, deck ,num_hand = 0):
+        self.add_hand_element()
+        self.hand[num_hand + 1]['hand_cards'].append(self.hand[num_hand]['hand_cards'][1])
+        self.hand[num_hand]['hand_cards'].pop(1)
+        self.get_card(deck, num_hand = 1)
+        self.get_card(deck)
 
     # Выводит количество очков в руке
-    def points_in_hand(self, split_hand = False):   #Пересиписывать из-за сплита
+    def points_in_hand(self, num_hand = 0):   #Пересиписывать из-за сплита
         points = 0
         count_ace = 0
-        if split_hand:
-            for item in self.split_hand:
-                points = self.count_points(item)
-                if points > 21:
-                    self.split_to_much = 1
-        else:
-            for item in self.hand:
-                self.count_points(item)
-                if points > 21:
-                    self.to_much = 1
+        for item in self.hand[num_hand]['hand_cards']:
+            if isinstance(item, str):
+                if item == 'T':
+                    points += 11
+                    count_ace += 1
+                else:
+                    points += 10
+            else:
+                points += item
+            while points > 21:
+                if count_ace > 0:
+                    points -= 10
+                    count_ace -= 1
+                else:
+                    break
+            if points > 21:
+                self.hand[num_hand]['hand_to_much'] = 1
         return points
 
-    #Считает количесво очков в руке
-    def count_points(self, item):
-        if isinstance(item, str):
-            if item == 'T':
-                points += 11
-                count_ace += 1
-            else:
-                points += 10
-        else:
-            points += item
-        while points > 21:
-            if count_ace > 0:
-                points -= 10
-                count_ace -= 1
-            else:
-                break
-        return points
+    # #Считает количесво очков в руке
+    # def count_points(self, item):
+    #     if isinstance(item, str):
+    #         if item == 'T':
+    #             points += 11
+    #             count_ace += 1
+    #         else:
+    #             points += 10
+    #     else:
+    #         points += item
+    #     while points > 21:
+    #         if count_ace > 0:
+    #             points -= 10
+    #             count_ace -= 1
+    #         else:
+    #             break
+    #     return points
 
 
     # Выбор действия (хватит, ещё, удвоить, сплит)
@@ -122,7 +129,7 @@ class Person():
             print ('3. Удвоить')
             if self.checkup_split(limit_money):
                 possibility = 4
-                print ('4. Сплит(Не реализован)')
+                print ('4. Сплит')
         while True:
             try:
                 move_code = int(input('>>>'))
