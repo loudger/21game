@@ -2,7 +2,7 @@ import copy
 import random
 
 
-class Deck():
+class Deck:
     basic_deck = [2, 3, 4, 5, 6, 7, 8, 9, 10, 'V', 'D', 'K', 'T'] * 4
 
     # конструктор, который создаёт колоду

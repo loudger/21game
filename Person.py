@@ -13,7 +13,7 @@ def cost_card(card):
     return cost
 
 
-class Person():
+class Person:
 
     # Конструктор игрока
     def __init__(self, name = 'noname', money = 1000):
@@ -37,22 +37,19 @@ class Person():
                 self.hand[num_hand]['hand_cards'].append(deck.get_one_card())
 
     # Делает ставку
-    def betting(self):
+    def betting(self, bet):
         while True:
-            try:
-                bet = int(input('Ваша ставка: '))
-                assert (bet > 0 and bet <= self.money)
-                print ('Осталось:{}-{}={}'.format(self.money, bet, self.money - bet))
-                self.money -= bet
-                return bet
-            except:
-                print ('Ошибка ввода')
+        # try:
+            assert (bet > 0 and bet <= self.money)  #В неверном случае выдаёт исключение AssertionError
+            self.money -= bet
+            return bet
+        # except AssertionError:
+        #     pass
 
     # Логика игры за диллера
     def diller_logic(self, deck):
         while self.points_in_hand() <= 16:
             self.get_card(deck)
-            print (self.hand[0]['hand_cards'],'-', self.points_in_hand())
         if self.points_in_hand() > 21:
             self.hand[0]['hand_to_much'] = True
 
@@ -77,7 +74,7 @@ class Person():
         self.get_card(deck, num_hand = 1)
         self.get_card(deck)
 
-    # Выводит количество очков в руке
+    # Возвращает количество очков в руке
     def points_in_hand(self, num_hand = 0):   #Пересиписывать из-за сплита
         points = 0
         count_ace = 0
@@ -100,42 +97,18 @@ class Person():
                 self.hand[num_hand]['hand_to_much'] = 1
         return points
 
-    # #Считает количесво очков в руке
-    # def count_points(self, item):
-    #     if isinstance(item, str):
-    #         if item == 'T':
-    #             points += 11
-    #             count_ace += 1
-    #         else:
-    #             points += 10
-    #     else:
-    #         points += item
-    #     while points > 21:
-    #         if count_ace > 0:
-    #             points -= 10
-    #             count_ace -= 1
-    #         else:
-    #             break
-    #     return points
-
-
     # Выбор действия (хватит, ещё, удвоить, сплит)
-    def move(self, limit_money, num_hand = 0):
-        possibility = 2
-        print ('1. Хватит')
-        print ('2. Ещё')
+    def move(self, limit_money, num_hand = 0, move_code):
+        possibility = 2     #По стандарту дано 2 действия (Хватит, Ещё)
         if self.checkup_dubl(limit_money, num_hand):
             possibility = 3
-            print ('3. Удвоить')
             if self.checkup_split(limit_money, num_hand) and len(self.hand) == 1 :
                 possibility = 4
-                print ('4. Сплит')
-        while True:
-            try:
-                move_code = int(input('>>>'))
-                if move_code > 0 and move_code <= possibility:
-                    return move_code
-                else:
-                    raise Exception
-            except:
-                print ('Ошибка ввода')
+        return self.set_move_code(move_code, possibility)
+
+    # Функция, которая устанавливает, что будет делать player
+    def set_move_code(self, move_code, possibility):
+        if move_code > 0 and move_code <= possibility:
+            return move_code
+        else:
+            raise ValueError

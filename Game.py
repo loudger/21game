@@ -5,6 +5,16 @@ from Deck import Deck
 import random
 
 
+#В этом классе должны быть основные функции для управления игрой. Такие как:
+#Игра начинается, создание игроков, начало раунда, ставка игрока, действие игрока, выбрать диллера, поменять диллера
+#Удалить игрока, Добавить игрока, Добавить деньги игроку, Удалить деньги у игрока,
+#
+#
+#
+#
+#
+
+
 class Game():
 
     # Конструктор для игры
@@ -16,7 +26,7 @@ class Game():
 
     # Создаёт игроков и даёт им имена
     def create_players(self):
-        print('Имена должны не повторяться и состоять минимум из трёх симловом')
+        # 'Имена должны не повторяться и состоять минимум из трёх симловом'
         if self.count_player >= 2:
             first_player = Person(name = self.input_name('первого'))
             self.players_list.append(first_player)
@@ -34,10 +44,11 @@ class Game():
 
     # Проверка на правильно введёное имя
     # Имена не повторяются
-    def input_name(self, number_of_player):
+    def input_name(self, number_of_player, set_name):
         while True:
+            message = 'Имя {} игрока:'.format(number_of_player) #Сообщение
             try:
-                name = str(input('Имя {} игрока:'.format(number_of_player)))
+                name = set_name
                 if len(name) >= 3 and len(name) <= 14:
                     for another_name in self.players_list:
                         if another_name.name == name:
@@ -46,12 +57,12 @@ class Game():
                 else:
                     raise Exception
             except Exception:
-                print('Ошибка ввода')
+                pass
 
     # Случайно определяет диллера
     def random_diller(self):
         self.diller = random.choice(self.players_list)
-        print('Выбран диллер! Сегодня это - {}\n'.format(self.diller.name))
+        message = str('Выбран диллер! Сегодня это - {}'.format(self.diller.name))
         return self.diller
 
     # Назначает следующего диллера
@@ -65,7 +76,7 @@ class Game():
 
     # Выводит имя диллера
     def show_diller(self):
-        print('\nВ этом раунде дилер {}!!'.format(self.diller.name))
+        message = str('В этом раунде дилер {}!!'.format(self.diller.name))
 
     # Убирает человека из игры
     def delete_player(self, player):
@@ -76,7 +87,7 @@ class Game():
         for player in self.players_list:
             if player.money <= 0 and player != self.diller:
                 self.players_list.remove(player)
-                print('\nИгрок {} выбывает из игры'.format(player.name))
+                message = str('Игрок {} выбывает из игры'.format(player.name))
 
     # Убирает дилера, если он остался без денег
     def diller_no_money(self):
@@ -86,7 +97,7 @@ class Game():
     # Проверка: остался ли хоть кто-то играть,кроме одного человека
     def left_one_player(self):
         if len(self.players_list) == 1:
-            print('Остался только {}, игра закончена'.format(self.players_list[0].name))
+            message = str('Остался только {}, игра закончена'.format(self.players_list[0].name))
             self.end_game()
 
     def all_checks(self):
@@ -97,17 +108,16 @@ class Game():
 
 
     # Начало игры
-    def start_game(self):
-        input('Нажмите Enter, чтобы играть в BlackJack')
+    def start_game(self, set_count_player):
+        message = str('Введите количество игроков(2 - 5):')
         while True:
             try:
-                self.count_player = int(input('Введите количество игроков(2 - 5):'))
+                self.count_player = set_count_player
                 if self.count_player >= 2 and self.count_player <= 5:
                     break
                 else:
                     raise Exception
             except:
-                print ('Повторите попытку')
         self.create_players()
         self.random_diller()
 

@@ -10,24 +10,22 @@ class Round():
     def __init__(self, all_players, diller, bank, deck):
         self.bank = bank
         self.count_player = len(all_players)
-        self.all_players = copy.copy(all_players)
-        self.players = copy.copy(all_players)
+        self.all_players = copy.copy(all_players)   #Все игроки
+        self.players = copy.copy(all_players)       #Все игроки раунда кроме дилера
         self.players.remove(diller)
         self.diller = diller
         self.deck = deck
 
     # Ход игрока
     def players_move(self, set_players = None, split = False):
-        if set_players is None:
+        if set_players is None:     # Если не установлено по каким игрокам проходить в раунде
             players = self.players
         else:
             players = [set_players]
         for player in players:
-            for num_hand in range(len(player.hand)):
+            for num_hand in range(len(player.hand)):    #Проходит по всем рукам всех игроков
                 self.show_diller_cards()
                 while True:
-                    print('\n', player.name)
-                    print(player.hand[num_hand]['hand_cards'], '-', player.points_in_hand(num_hand))
                     if player.points_in_hand(num_hand) == 21:
                         break
                     move_code = player.move(self.bank.return_value(player, num_hand), num_hand = num_hand)
@@ -42,16 +40,11 @@ class Round():
                     elif move_code == 3:
                         player.get_card(self.deck, num_hand = num_hand)
                         self.bank.double_bet(player, num_hand)
-                        print('\n', player.name)
-                        print(player.hand[num_hand]['hand_cards'], '-', player.points_in_hand(num_hand))
                         player.points_in_hand(num_hand)
                         if player.hand[num_hand]['hand_to_much'] == True:
-                            print('\n', player.name)
-                            print(player.hand[num_hand]['hand_cards'], '-', player.points_in_hand(num_hand))
                             self.player_lose(player, num_hand)
                         break
                     else:
-                        pass
                         player.split_cards(self.deck)
                         self.bank.bet_in_split_bank(player)
                         self.players_move(player, split = True)
@@ -59,17 +52,14 @@ class Round():
 
     # Показать карты диллера
     def show_diller_cards(self, hide = True):
-        print('\nКарты диллера')
         if hide == True:
-            print ([self.diller.hand[0]['hand_cards'][0], '?'])
+            return [self.diller.hand[0]['hand_cards'][0], '?']
         else:
-            print (self.diller.hand[0]['hand_cards'],'-',self.diller.points_in_hand())
+            return self.diller.hand[0]['hand_cards']
 
     # Игроки делают ставки
     def push_bets(self):
         for player in self.players:
-            print()
-            print ('{}, Ваш банк: {}'.format(player.name, player.money))
             self.bank.bet_in_bank(player)
 
     # Раздать карты игрокам
@@ -102,22 +92,18 @@ class Round():
 
     # Реализация выигрыша
     def result_win(self, player, num_hand):
-        print()
-        print('{},{}={} > Вы выиграли!'.format(player.name, player.hand[num_hand]['hand_cards'], player.points_in_hand(num_hand)))
         self.bank.rewarding(player, num_hand)
+        return ('{},{}={} > Вы выиграли!'.format(player.name, player.hand[num_hand]['hand_cards'], player.points_in_hand(num_hand)))
 
     # Если игрок проиграл
     def player_lose(self, player, num_hand):
-        print()
-        print('{},{}={} > Вы проиграли!'.format(player.name, player.hand[num_hand]['hand_cards'], player.points_in_hand(num_hand)))
-        # self.players.remove(player)
         self.bank.diller_is_winer(player, num_hand)
+        return ('{},{}={} > Вы проиграли!'.format(player.name, player.hand[num_hand]['hand_cards'], player.points_in_hand(num_hand)))
 
     # Реализация ничьи
     def result_draw(self,player, num_hand):
-        print()
-        print('{},{}={} > Ничья!'.format(player.name, player.hand[num_hand]['hand_cards'], player.points_in_hand(num_hand)))
         self.bank.return_money(player, num_hand)
+        return ('{},{}={} > Ничья!'.format(player.name, player.hand[num_hand]['hand_cards'], player.points_in_hand(num_hand)))
 
     # Ход диллера
     def diller_turn(self):
